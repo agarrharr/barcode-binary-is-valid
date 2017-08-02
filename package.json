@@ -1,0 +1,27 @@
+{
+  "name": "barcode-binary-is-valid",
+  "version": "1.0.0",
+  "description": "Checks binary value of a barcode to see if it's valid",
+  "main": "index.js",
+  "scripts": {
+    "test": "xo && ava"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agarrharr/barcode-binary-is-valid.git"
+  },
+  "keywords": [
+    "barcode",
+    "binary"
+  ],
+  "author": "Adam Harris",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/agarrharr/barcode-binary-is-valid/issues"
+  },
+  "homepage": "https://github.com/agarrharr/barcode-binary-is-valid#readme",
+  "devDependencies": {
+    "ava": "^0.21.0",
+    "xo": "^0.18.2"
+  }
+}
