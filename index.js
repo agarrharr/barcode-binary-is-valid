@@ -6,7 +6,8 @@ const errorMessages = {
 	LEFT_GUARD: () => `Missing left guard: Should start with 101`,
 	RIGHT_GUARD: () => `Missing right guard: Should end with 101`,
 	CENTER_GUARD: () => `Missing center guard: Should have 01010 in the middle`,
-	INCORRECT_NUMBER: info => `Incorrect number: the number at position ${info.index} (${info.number}) is not a valid number`
+	INCORRECT_NUMBER: info => `Incorrect number: the number at position ${info.index} (${info.number}) is not a valid number`,
+	INCORRECT_MODULO: `Incorrect modulo: The module character doesn't match. The UPC isn't valid.`
 };
 
 const ERRORS = Object.keys(errorMessages).reduce((a, key) => Object.assign(a, {[key]: key}), {});
@@ -43,6 +44,18 @@ const rightSideCodes = [
 	'1110100'
 ];
 
+const convertLeft = a => leftSideCodes.indexOf(a);
+const convertRight = a => rightSideCodes.indexOf(a);
+const moduloEquation = n => 3 * (n[0] + n[2] + n[4] + n[6] + n[8] + n[10]) + (n[1] + n[3] + n[5] + n[7] + n[9]);
+const roundUpTen = a => (Math.floor(a / 10) + 1) * 10;
+
+const checkModulo = barcode => {
+	const n = [...barcode.leftNumbers.map(d => convertLeft(d)), ...barcode.rightNumbers.map(d => convertRight(d))];
+	const modulo = n[11];
+	const result = moduloEquation(n);
+	return modulo === (roundUpTen(result) - result);
+};
+
 const binary = string => {
 	const barcode = barCodeGetBinarySections(string);
 	if (string.length !== 95) {
@@ -69,7 +82,7 @@ const binary = string => {
 			return getError(ERRORS.INCORRECT_NUMBER, {index: i, number: barcode.rightNumbers[i]});
 		}
 	}
-	return true;
+	return checkModulo(barcode);
 };
 
 module.exports = string => binary(string);
