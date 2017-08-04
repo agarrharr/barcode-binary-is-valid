@@ -1,6 +1,6 @@
 {
   "name": "barcode-binary-is-valid",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Checks binary value of a barcode to see if it's valid",
   "main": "index.js",
   "scripts": {
