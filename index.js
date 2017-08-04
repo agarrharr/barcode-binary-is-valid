@@ -1,4 +1,5 @@
 'use strict';
+const barCodeGetBinarySections = require('barcode-get-binary-sections');
 
 const errorMessages = {
 	LENGTH: () => `Incorrect length: Should have 95 bits`,
@@ -43,35 +44,29 @@ const rightSideCodes = [
 ];
 
 const binary = string => {
-	// Should have 95 bits
+	const barcode = barCodeGetBinarySections(string);
 	if (string.length !== 95) {
 		return getError(ERRORS.LENGTH);
 	}
-	// Left-hand guard pattern
-	if (string.slice(0, 3) !== '101') {
+	if (barcode.leftHandGuard !== '101') {
 		return getError(ERRORS.LEFT_GUARD);
 	}
-	// Right-hand guard pattern
-	if (string.slice(-3) !== '101') {
+	if (barcode.rightHandGuard !== '101') {
 		return getError(ERRORS.RIGHT_GUARD);
 	}
-	// Center guard pattern
-	if (string.slice(45, 50) !== '01010') {
+	if (barcode.centerGuard !== '01010') {
 		return getError(ERRORS.CENTER_GUARD);
 	}
-	const withoutGuards = string.slice(3, 45).concat(string.slice(50, 92));
-	const numbers = withoutGuards.match(/.{7}/g);
-	const isBackwards = rightSideCodes.includes(numbers[0]);
-	for (let i = 0; i < 6; i++) {
-		const codes = isBackwards ? rightSideCodes : leftSideCodes;
-		if (!codes.includes(numbers[i])) {
-			return getError(ERRORS.INCORRECT_NUMBER, {index: i, number: numbers[i]});
+	for (let i = 0; i < barcode.leftNumbers.length; i++) {
+		const codes = barcode.isBackwards ? rightSideCodes : leftSideCodes;
+		if (!codes.includes(barcode.leftNumbers[i])) {
+			return getError(ERRORS.INCORRECT_NUMBER, {index: i, number: barcode.leftNumbers[i]});
 		}
 	}
-	for (let i = 6; i < 12; i++) {
-		const codes = isBackwards ? leftSideCodes : rightSideCodes;
-		if (!codes.includes(numbers[i])) {
-			return getError(ERRORS.INCORRECT_NUMBER, {index: i, number: numbers[i]});
+	for (let i = 0; i < barcode.rightNumbers.length; i++) {
+		const codes = barcode.isBackwards ? leftSideCodes : rightSideCodes;
+		if (!codes.includes(barcode.rightNumbers[i])) {
+			return getError(ERRORS.INCORRECT_NUMBER, {index: i, number: barcode.rightNumbers[i]});
 		}
 	}
 	return true;

@@ -23,5 +23,8 @@
   "devDependencies": {
     "ava": "^0.21.0",
     "xo": "^0.18.2"
+  },
+  "dependencies": {
+    "barcode-get-binary-sections": "^1.0.0"
   }
 }
