@@ -1,23 +1,26 @@
 'use strict';
 
-const ERROR = {
-	LENGTH: {
-		code: 'LENGTH',
-		message: 'Incorrect length: Should have 95 bits'
-	},
-	LEFT_GUARD: {
-		code: 'LEFT_GUARD',
-		message: 'Missing left guard: Should start with 101'
-	},
-	RIGHT_GUARD: {
-		code: 'RIGHT_GUARD',
-		message: 'Missing right guard: Should end with 101'
-	},
-	CENTER_GUARD: {
-		code: 'CENTER_GUARD',
-		message: 'Missing center guard: Should have 01010 in the middle'
-	}
+const errorMessages = {
+	LENGTH: () => `Incorrect length: Should have 95 bits`,
+	LEFT_GUARD: () => `Missing left guard: Should start with 101`,
+	RIGHT_GUARD: () => `Missing right guard: Should end with 101`,
+	CENTER_GUARD: () => `Missing center guard: Should have 01010 in the middle`,
+	INCORRECT_NUMBER: info => `Incorrect number: the number at position ${info.index} (${info.number}) is not a valid number`
 };
+
+const ERRORS = {
+	LENGTH: 'LENGTH',
+	LEFT_GUARD: 'LEFT_GUARD',
+	RIGHT_GUARD: 'RIGHT_GUARD',
+	CENTER_GUARD: 'CENTER_GUARD',
+	INCORRECT_NUMBER: 'INCORRECT_NUMBER'
+};
+
+const getError = (type, info) => ({
+	success: false,
+	message: errorMessages[type](info),
+	code: type
+});
 
 const leftSideCodes = [
 	'0001101',
@@ -45,45 +48,36 @@ const rightSideCodes = [
 	'1110100'
 ];
 
-const getError = error => ({
-	success: false,
-	message: error.message,
-	code: error.code
-});
-
 module.exports = binary => {
 	// Should have 95 bits
 	if (binary.length !== 95) {
-		return getError(ERROR.LENGTH);
+		return getError(ERRORS.LENGTH);
 	}
 	// Left-hand guard pattern
 	if (binary.slice(0, 3) !== '101') {
-		return getError(ERROR.LEFT_GUARD);
+		return getError(ERRORS.LEFT_GUARD);
 	}
 	// Right-hand guard pattern
 	if (binary.slice(-3) !== '101') {
-		return getError(ERROR.RIGHT_GUARD);
+		return getError(ERRORS.RIGHT_GUARD);
 	}
 	// Center guard pattern
 	if (binary.slice(45, 50) !== '01010') {
-		return getError(ERROR.CENTER_GUARD);
+		return getError(ERRORS.CENTER_GUARD);
 	}
 	const withoutGuards = binary.slice(3, 45).concat(binary.slice(50, 92));
 	const numbers = withoutGuards.match(/.{7}/g);
-	if (numbers.length !== 12) {
-		return false;
-	}
 	const isBackwards = rightSideCodes.includes(numbers[0]);
 	for (let i = 0; i < 6; i++) {
 		const codes = isBackwards ? rightSideCodes : leftSideCodes;
 		if (!codes.includes(numbers[i])) {
-			return false;
+			return getError(ERRORS.INCORRECT_NUMBER, {index: i, number: numbers[i]});
 		}
 	}
 	for (let i = 6; i < 12; i++) {
 		const codes = isBackwards ? leftSideCodes : rightSideCodes;
 		if (!codes.includes(numbers[i])) {
-			return false;
+			return getError(ERRORS.INCORRECT_NUMBER, {index: i, number: numbers[i]});
 		}
 	}
 	return true;
