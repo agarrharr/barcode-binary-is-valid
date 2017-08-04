@@ -4,7 +4,7 @@
   "description": "Checks binary value of a barcode to see if it's valid",
   "main": "index.js",
   "scripts": {
-    "test": "xo && ava"
+    "test": "ava"
   },
   "repository": {
     "type": "git",

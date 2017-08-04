@@ -8,13 +8,7 @@ const errorMessages = {
 	INCORRECT_NUMBER: info => `Incorrect number: the number at position ${info.index} (${info.number}) is not a valid number`
 };
 
-const ERRORS = {
-	LENGTH: 'LENGTH',
-	LEFT_GUARD: 'LEFT_GUARD',
-	RIGHT_GUARD: 'RIGHT_GUARD',
-	CENTER_GUARD: 'CENTER_GUARD',
-	INCORRECT_NUMBER: 'INCORRECT_NUMBER'
-};
+const ERRORS = Object.keys(errorMessages).reduce((a, key) => Object.assign(a, {[key]: key}), {});
 
 const getError = (type, info) => ({
 	success: false,
@@ -48,24 +42,24 @@ const rightSideCodes = [
 	'1110100'
 ];
 
-module.exports = binary => {
+const binary = string => {
 	// Should have 95 bits
-	if (binary.length !== 95) {
+	if (string.length !== 95) {
 		return getError(ERRORS.LENGTH);
 	}
 	// Left-hand guard pattern
-	if (binary.slice(0, 3) !== '101') {
+	if (string.slice(0, 3) !== '101') {
 		return getError(ERRORS.LEFT_GUARD);
 	}
 	// Right-hand guard pattern
-	if (binary.slice(-3) !== '101') {
+	if (string.slice(-3) !== '101') {
 		return getError(ERRORS.RIGHT_GUARD);
 	}
 	// Center guard pattern
-	if (binary.slice(45, 50) !== '01010') {
+	if (string.slice(45, 50) !== '01010') {
 		return getError(ERRORS.CENTER_GUARD);
 	}
-	const withoutGuards = binary.slice(3, 45).concat(binary.slice(50, 92));
+	const withoutGuards = string.slice(3, 45).concat(string.slice(50, 92));
 	const numbers = withoutGuards.match(/.{7}/g);
 	const isBackwards = rightSideCodes.includes(numbers[0]);
 	for (let i = 0; i < 6; i++) {
@@ -82,3 +76,5 @@ module.exports = binary => {
 	}
 	return true;
 };
+
+module.exports = string => binary(string);
