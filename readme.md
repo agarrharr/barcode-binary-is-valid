@@ -18,9 +18,9 @@ barcodeBinaryIsValid('1010001101011000100110010001101000110100011010101011100101
 
 barcodeBinaryIsValid('10110011')
 //=> {
-	success: false,
-	message: 'Incorrect length: Should have 95 bits'
-	code: 'LENGTH',
+  success: false,
+  message: 'Incorrect length: Should have 95 bits'
+  code: 'LENGTH',
 }
 ```
 
@@ -34,7 +34,7 @@ Returns barcode in binary
 
 Type: `string`
 
-A string of the barcode where each bar and gap is represented by one number between 1 and 4 depending on its width.
+A binary representation of the barcode in binary.
 
 ## License
 
