@@ -1,5 +1,6 @@
 'use strict';
-const barCodeGetBinarySections = require('barcode-get-binary-sections');
+const barcodeGetBinarySections = require('barcode-get-binary-sections');
+const barcodeConvertNumber = require('barcode-convert-number');
 
 const errorMessages = {
 	LENGTH: () => `Incorrect length: Should have 95 bits`,
@@ -9,14 +10,6 @@ const errorMessages = {
 	INCORRECT_NUMBER: info => `Incorrect number: the number at position ${info.index} (${info.number}) is not a valid number`,
 	INCORRECT_MODULO: () => `Incorrect modulo: The module character doesn't match. The UPC isn't valid.`
 };
-
-const ERRORS = Object.keys(errorMessages).reduce((a, key) => Object.assign(a, {[key]: key}), {});
-
-const getError = (type, info) => ({
-	success: false,
-	message: errorMessages[type](info),
-	code: type
-});
 
 const leftSideCodes = [
 	'0001101',
@@ -44,13 +37,19 @@ const rightSideCodes = [
 	'1110100'
 ];
 
-const convertLeft = a => leftSideCodes.indexOf(a);
-const convertRight = a => rightSideCodes.indexOf(a);
+const ERRORS = Object.keys(errorMessages).reduce((a, key) => Object.assign(a, {[key]: key}), {});
+
+const getError = (type, info) => ({
+	success: false,
+	message: errorMessages[type](info),
+	code: type
+});
+
 const moduloEquation = n => 3 * (n[0] + n[2] + n[4] + n[6] + n[8] + n[10]) + (n[1] + n[3] + n[5] + n[7] + n[9]);
 const roundUpTen = a => (Math.floor(a / 10) + 1) * 10;
 
 const checkModulo = barcode => {
-	const n = [...barcode.leftNumbers.map(d => convertLeft(d)), ...barcode.rightNumbers.map(d => convertRight(d))];
+	const n = [...barcode.leftNumbers.map(d => barcodeConvertNumber(d)), ...barcode.rightNumbers.map(d => barcodeConvertNumber(d))];
 	const modulo = n[11];
 	const result = moduloEquation(n);
 	return (modulo === (roundUpTen(result) - result)) ||
@@ -58,7 +57,7 @@ const checkModulo = barcode => {
 };
 
 const binary = string => {
-	const barcode = barCodeGetBinarySections(string);
+	const barcode = barcodeGetBinarySections(string);
 	if (string.length !== 95) {
 		return getError(ERRORS.LENGTH);
 	}
